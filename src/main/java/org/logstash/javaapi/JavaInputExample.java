@@ -27,13 +27,8 @@ public class JavaInputExample implements Input {
     private final CountDownLatch done = new CountDownLatch(1);
     private volatile boolean stopped;
 
-    static {
-System.out.println("JavaInputExample static initializer");
-    }
-
     // all plugins must provide a constructor that accepts Configuration and Context
     public JavaInputExample(Configuration config, Context context) {
-System.out.println("JavaInputExample constructor");
         // constructors should validate configuration options
         if (config.contains(EVENT_COUNT_CONFIG)) {
             Object o = config.get(EVENT_COUNT_CONFIG);
