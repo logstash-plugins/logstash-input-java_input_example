@@ -30,32 +30,15 @@ public class JavaInputExample implements Input {
     // all plugins must provide a constructor that accepts Configuration and Context
     public JavaInputExample(Configuration config, Context context) {
         // constructors should validate configuration options
-        if (config.contains(EVENT_COUNT_CONFIG)) {
-            Object o = config.get(EVENT_COUNT_CONFIG);
-            if (o instanceof Long) {
-                this.count = (Long)o;
-            } else {
-                throw new IllegalStateException(
-                        String.format("Invalid value '%s' for config option %s", o, EVENT_COUNT_CONFIG));
-            }
-        }
-
-        if (config.contains(PREFIX_CONFIG)) {
-            Object o = config.get(PREFIX_CONFIG);
-            if (o instanceof String) {
-                this.prefix = (String)o;
-            } else {
-                throw new IllegalStateException(
-                        String.format("Invalid value '%s' for config option %s", o, PREFIX_CONFIG));
-            }
-        }
+        count = config.get(EVENT_COUNT_CONFIG);
+        prefix = config.get(PREFIX_CONFIG);
     }
 
     @Override
     public void start(QueueWriter queueWriter) {
 
         // The start method should push Map<String, Object> instances to the supplied QueueWriter
-        // instance. Those will later be converted to Event instances later in the Logstash event
+        // instance. Those will be converted to Event instances later in the Logstash event
         // processing pipeline.
         //
         // Inputs that operate on unbounded streams of data or that poll indefinitely for new
