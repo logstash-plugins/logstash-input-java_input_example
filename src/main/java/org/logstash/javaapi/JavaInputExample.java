@@ -2,12 +2,13 @@ package org.logstash.javaapi;
 
 import co.elastic.logstash.api.Configuration;
 import co.elastic.logstash.api.Context;
-import co.elastic.logstash.api.Input;
 import co.elastic.logstash.api.LogstashPlugin;
 import co.elastic.logstash.api.PluginConfigSpec;
+import co.elastic.logstash.api.v0.Input;
 import org.apache.commons.lang3.StringUtils;
 import org.logstash.execution.queue.QueueWriter;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
@@ -22,8 +23,8 @@ public class JavaInputExample implements Input {
     public static final PluginConfigSpec<String> PREFIX_CONFIG =
             Configuration.stringSetting("prefix", "message");
 
-    private long count = EVENT_COUNT_CONFIG.defaultValue();
-    private String prefix = PREFIX_CONFIG.defaultValue();
+    private long count;
+    private String prefix;
     private final CountDownLatch done = new CountDownLatch(1);
     private volatile boolean stopped;
 
@@ -72,6 +73,6 @@ public class JavaInputExample implements Input {
     @Override
     public Collection<PluginConfigSpec<?>> configSchema() {
         // should return a list of all configuration options for this plugin
-        return Collections.singletonList(EVENT_COUNT_CONFIG);
+        return Arrays.asList(EVENT_COUNT_CONFIG, PREFIX_CONFIG);
     }
 }

@@ -1,16 +1,12 @@
 package org.logstash.javaapi;
 
 import co.elastic.logstash.api.Configuration;
-import co.elastic.logstash.api.Context;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.logstash.Event;
 import org.logstash.execution.queue.QueueWriter;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
