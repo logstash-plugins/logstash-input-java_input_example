@@ -270,7 +270,7 @@ The following items should be modified in the file above:
 1. It should be named to correspond with the input name.
 1. `require "logstash-input-java_input_example_jars"` should be changed to reference the appropriate "jars" file
 as described below.
-1. `class LogStash::Inputs::JavaFilterExample < LogStash::Inputs::Base` should be changed to provide a unique and
+1. `class LogStash::Inputs::JavaInputExample < LogStash::Inputs::Base` should be changed to provide a unique and
 descriptive Ruby class name.
 1. `config_name "java_input_example"` must match the name of the plugin as specified in the `name` property of
 the `@LogstashPlugin` annotation.
