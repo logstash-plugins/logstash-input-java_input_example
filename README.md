@@ -4,8 +4,6 @@
 
 This is a Java plugin for [Logstash](https://github.com/elastic/logstash).
 
-This is a Java plugin for [Logstash](https://github.com/elastic/logstash).
-
 It is fully free and fully open source. The license is Apache 2.0, meaning you are free to use it however you want.
 
 ## How to write a Java input
