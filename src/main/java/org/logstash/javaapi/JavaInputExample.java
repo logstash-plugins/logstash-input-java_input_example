@@ -2,41 +2,44 @@ package org.logstash.javaapi;
 
 import co.elastic.logstash.api.Configuration;
 import co.elastic.logstash.api.Context;
+import co.elastic.logstash.api.Input;
 import co.elastic.logstash.api.LogstashPlugin;
 import co.elastic.logstash.api.PluginConfigSpec;
-import co.elastic.logstash.api.v0.Input;
 import org.apache.commons.lang3.StringUtils;
-import org.logstash.execution.queue.QueueWriter;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 // class name must match plugin name
 @LogstashPlugin(name="java_input_example")
 public class JavaInputExample implements Input {
 
     public static final PluginConfigSpec<Long> EVENT_COUNT_CONFIG =
-            Configuration.numSetting("count", 3);
+            PluginConfigSpec.numSetting("count", 3);
 
     public static final PluginConfigSpec<String> PREFIX_CONFIG =
-            Configuration.stringSetting("prefix", "message");
+            PluginConfigSpec.stringSetting("prefix", "message");
 
+    private String id;
     private long count;
     private String prefix;
     private final CountDownLatch done = new CountDownLatch(1);
     private volatile boolean stopped;
 
-    // all plugins must provide a constructor that accepts Configuration and Context
-    public JavaInputExample(Configuration config, Context context) {
+    // all plugins must provide a constructor that accepts id, Configuration, and Context
+    public JavaInputExample(String id, Configuration config, Context context) {
         // constructors should validate configuration options
+        this.id = id;
         count = config.get(EVENT_COUNT_CONFIG);
         prefix = config.get(PREFIX_CONFIG);
     }
 
     @Override
-    public void start(QueueWriter queueWriter) {
+    public void start(Consumer<Map<String, Object>> consumer) {
 
         // The start method should push Map<String, Object> instances to the supplied QueueWriter
         // instance. Those will be converted to Event instances later in the Logstash event
@@ -51,7 +54,7 @@ public class JavaInputExample implements Input {
         try {
             while (!stopped && eventCount < count) {
                 eventCount++;
-                queueWriter.push(Collections.singletonMap("message",
+                consumer.accept(Collections.singletonMap("message",
                         prefix + " " + StringUtils.center(eventCount + " of " + count, 20)));
             }
         } finally {
@@ -74,5 +77,10 @@ public class JavaInputExample implements Input {
     public Collection<PluginConfigSpec<?>> configSchema() {
         // should return a list of all configuration options for this plugin
         return Arrays.asList(EVENT_COUNT_CONFIG, PREFIX_CONFIG);
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
     }
 }
