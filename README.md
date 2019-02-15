@@ -330,7 +330,50 @@ Once your Java plugin has been packaged as a Ruby gem, it can be installed in Lo
 ```
 bin/logstash-plugin install --no-verify --local /path/to/javaPlugin.gem
 ```
-Substitute backslashes for forward slashes as appropriate in the command above for installation on Windows platforms. 
+Substitute backslashes for forward slashes as appropriate in the command above for installation on Windows platforms.
+
+### Running Logstash with the Java input plugin
+
+The following is a minimal Logstash configuration that can be used to test that the Java input plugin is correctly
+installed and functioning.
+
+```
+input {
+  java_input_example {}
+}
+output {
+  stdout { codec => rubydebug }
+}
+```
+
+Copy the above Logstash configuration to a file such as `java_input.conf`. Logstash should then be started with:
+
+```
+bin/logstash --java-execution -f /path/to/java_input.conf
+```
+
+Note that the `--java-execution` flag to enable the Java execution engine is required as Java plugins are not supported
+in the Ruby execution engine.
+
+The expected Logstash output with the configuration above is (excluding initialization):
+
+```
+{
+      "@version" => "1",
+       "message" => "message        1 of 3       ",
+    "@timestamp" => yyyy-MM-ddThh:mm:ss.SSSZ
+}
+{
+      "@version" => "1",
+       "message" => "message        2 of 3       ",
+    "@timestamp" => yyyy-MM-ddThh:mm:ss.SSSZ
+}
+{
+      "@version" => "1",
+       "message" => "message        3 of 3       ",
+    "@timestamp" => yyyy-MM-ddThh:mm:ss.SSSZ
+}
+```
 
 ### Feedback
 
