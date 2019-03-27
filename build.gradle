@@ -8,9 +8,9 @@ apply plugin: 'maven'
 apply plugin: "distribution"
 
 group 'org.logstash.javaapi'
-version "${new File("VERSION").text.trim()}"
+version "${file("VERSION").text.trim()}"
 
-description = "Example Java filter implementation"
+description = "Example Java input implementation"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

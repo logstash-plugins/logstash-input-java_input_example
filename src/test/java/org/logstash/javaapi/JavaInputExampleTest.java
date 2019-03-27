@@ -4,12 +4,13 @@ import co.elastic.logstash.api.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.logstash.execution.queue.QueueWriter;
+import org.logstash.plugins.ConfigurationImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class JavaInputExampleTest {
 
@@ -20,32 +21,33 @@ public class JavaInputExampleTest {
         Map<String, Object> configValues = new HashMap<>();
         configValues.put(JavaInputExample.PREFIX_CONFIG.name(), prefix);
         configValues.put(JavaInputExample.EVENT_COUNT_CONFIG.name(), eventCount);
-        Configuration config = new Configuration(configValues);
-        JavaInputExample input = new JavaInputExample(config, null);
-        TestQueueWriter testQueueWriter = new TestQueueWriter();
-        input.start(testQueueWriter);
+        Configuration config = new ConfigurationImpl(configValues);
+        JavaInputExample input = new JavaInputExample("test-id", config, null);
+        TestConsumer testConsumer = new TestConsumer();
+        input.start(testConsumer);
 
-        List<Map<String, Object>> events = testQueueWriter.getEvents();
+        List<Map<String, Object>> events = testConsumer.getEvents();
         Assert.assertEquals(eventCount, events.size());
         for (int k = 1; k <= events.size(); k++) {
             Assert.assertEquals(prefix + " " + StringUtils.center(k + " of " + eventCount, 20),
                     events.get(k - 1).get("message"));
         }
     }
-}
 
-class TestQueueWriter implements QueueWriter {
+    private static class TestConsumer implements Consumer<Map<String, Object>> {
 
-    private List<Map<String, Object>> events = new ArrayList<>();
+        private List<Map<String, Object>> events = new ArrayList<>();
 
-    @Override
-    public void push(Map<String, Object> event) {
-        synchronized (this) {
-            events.add(event);
+        @Override
+        public void accept(Map<String, Object> event) {
+            synchronized (this) {
+                events.add(event);
+            }
+        }
+
+        public List<Map<String, Object>> getEvents() {
+            return events;
         }
     }
 
-    public List<Map<String, Object>> getEvents() {
-        return events;
-    }
 }
