@@ -1,10 +1,11 @@
-package org.logstash.javaapi;
+package org.logstashplugins;
 
 import co.elastic.logstash.api.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.logstash.plugins.ConfigurationImpl;
+import org.logstashplugins.JavaInputExample;
 
 import java.util.ArrayList;
 import java.util.HashMap;
