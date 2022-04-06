@@ -26,11 +26,11 @@ targetCompatibility = 1.8
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
+        gradlePluginPortal()
     }
 
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+        classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
     }
 }
 
@@ -39,6 +39,14 @@ repositories {
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
+
+configurations {
+    // needed because the compileOnlyNotShadowed dependencies must be resolved by the function validatePluginJar
+    compileOnly.canBeResolved = true
+
+    compileOnlyNotShadowed
+    compileOnly.extendsFrom compileOnlyNotShadowed
+}
 
 shadowJar {
     archiveClassifier = null
