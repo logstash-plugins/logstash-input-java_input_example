@@ -1,6 +1,16 @@
 import java.nio.file.Files
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
+if (!hasProperty('LOGSTASH_CORE_PATH')) {
+    logger.error """*****************
+    |Property LOGSTASH_CORE_PATH is not defined.
+    |Create a gradle.properties file and insert the LOGSTASH_CORE_PATH pointing to the logstash-core folder
+    |of a local Logstash clone.
+    |*****************
+    """.stripMargin()
+    throw new GradleException("Property LOGSTASH_CORE_PATH is not defined.")
+}
+
 apply plugin: 'java'
 apply from: LOGSTASH_CORE_PATH + "/../rubyUtils.gradle"
 
