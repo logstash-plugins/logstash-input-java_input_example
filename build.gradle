@@ -42,14 +42,28 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 configurations {
     // needed because the compileOnlyNotShadowed dependencies must be resolved by the function validatePluginJar
-    compileOnly.canBeResolved = true
+//    compileOnly.canBeResolved = true
+//    implementationNotShadowed.canBeResolved = true
 
-    compileOnlyNotShadowed
-    compileOnly.extendsFrom compileOnlyNotShadowed
+//    compileOnlyNotShadowed
+//    compileOnly.extendsFrom compileOnlyNotShadowed
+
+//    implementationNotShadowed
+//    implementation.extendsFrom implementationNotShadowed
+
+//    shadowCore
+//    shadow.extendsFrom shadowCore
+
+//    shadowCore
+//    implementation.extendsFrom shadowCore
+//    shadow.extendsFrom shadowCore
+
+//    implementation.extendsFrom shadow
 }
 
 shadowJar {
     archiveClassifier = null
+//    configurations = [project.configurations.shadowCore]
 }
 
 dependencies {
