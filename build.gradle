@@ -28,42 +28,14 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
     }
-
-    dependencies {
-        classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
-    }
 }
 
 repositories {
     mavenCentral()
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
-
 configurations {
-    // needed because the compileOnlyNotShadowed dependencies must be resolved by the function validatePluginJar
-//    compileOnly.canBeResolved = true
-//    implementationNotShadowed.canBeResolved = true
-
-//    compileOnlyNotShadowed
-//    compileOnly.extendsFrom compileOnlyNotShadowed
-
-//    implementationNotShadowed
-//    implementation.extendsFrom implementationNotShadowed
-
-//    shadowCore
-//    shadow.extendsFrom shadowCore
-
-//    shadowCore
-//    implementation.extendsFrom shadowCore
-//    shadow.extendsFrom shadowCore
-
-//    implementation.extendsFrom shadow
-}
-
-shadowJar {
-    archiveClassifier = null
-//    configurations = [project.configurations.shadowCore]
+    implementation.canBeResolved = true
 }
 
 dependencies {
@@ -87,16 +59,35 @@ clean {
     }
 }
 
+jar {
+    manifest {
+        attributes(
+                'Logstash-plugin': "${pluginInfo.pluginFullName()}-${project.version}"
+        )
+    }
+}
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
 tasks.register("vendor"){
-    dependsOn shadowJar
+    dependsOn jar
     doLast {
         String vendorPathPrefix = "vendor/jar-dependencies"
+        configurations.runtimeClasspath.allDependencies
+                .findAll {dep -> dep.group != null } // removes fileTree dependencies
+                .each {dep ->
+                    println "DNADBG>> vendor, processing deps: ${dep} group: ${dep.group} name: ${dep.name}"
+                    File f = configurations.runtimeClasspath.filter { it.absolutePath.contains("${dep.group}/${dep.name}/${dep.version}") }.singleFile
+                    String groupPath = dep.group.replaceAll('\\.', '/')
+                    File newJarFile = file("${vendorPathPrefix}/${groupPath}/${dep.name}/${dep.version}/${dep.name}-${dep.version}.jar")
+                    newJarFile.mkdirs()
+                    Files.copy(f.toPath(), newJarFile.toPath(), REPLACE_EXISTING)
+                }
         String projectGroupPath = project.group.replaceAll('\\.', '/')
         File projectJarFile = file("${vendorPathPrefix}/${projectGroupPath}/${pluginInfo.pluginFullName()}/${project.version}/${pluginInfo.pluginFullName()}-${project.version}.jar")
+//        File projectJarFile = file("${vendorPathPrefix}/${projectGroupPath}/${project.name}/${project.version}/${project.name}-${project.version}.jar")
         projectJarFile.mkdirs()
         Files.copy(file("$buildDir/libs/${project.name}-${project.version}.jar").toPath(), projectJarFile.toPath(), REPLACE_EXISTING)
         validatePluginJar(projectJarFile, project.group)
@@ -105,7 +96,11 @@ tasks.register("vendor"){
 
 tasks.register("generateRubySupportFiles") {
     doLast {
-        generateRubySupportFilesForPlugin(project.description, project.group, version)
+        // clean dependencies without group, like the Logstash fileTree
+        var deps = configurations.runtimeClasspath.allDependencies
+                .findAll {dep -> dep.group != null }
+
+        generateRubySupportFilesForPlugin(project.description, project.group, version, deps)
     }
 }
 
