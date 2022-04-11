@@ -88,7 +88,6 @@ tasks.register("vendor"){
         configurations.runtimeClasspath.allDependencies
                 .findAll {dep -> dep.group != null } // removes fileTree dependencies
                 .each {dep ->
-                    println "DNADBG>> vendor, processing deps: ${dep} group: ${dep.group} name: ${dep.name}"
                     File f = configurations.runtimeClasspath.filter { it.absolutePath.contains("${dep.group}/${dep.name}/${dep.version}") }.singleFile
                     String groupPath = dep.group.replaceAll('\\.', '/')
                     File newJarFile = file("${vendorPathPrefix}/${groupPath}/${dep.name}/${dep.version}/${dep.name}-${dep.version}.jar")
