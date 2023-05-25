@@ -1,6 +1,16 @@
 import java.nio.file.Files
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
+if (!hasProperty('LOGSTASH_CORE_PATH')) {
+    logger.error """*****************
+    |Property LOGSTASH_CORE_PATH is not defined.
+    |Create a gradle.properties file and insert the LOGSTASH_CORE_PATH pointing to the logstash-core folder
+    |of a local Logstash clone.
+    |*****************
+    """.stripMargin()
+    throw new GradleException("Property LOGSTASH_CORE_PATH is not defined.")
+}
+
 apply plugin: 'java'
 apply from: LOGSTASH_CORE_PATH + "/../rubyUtils.gradle"
 
@@ -26,11 +36,7 @@ targetCompatibility = 1.8
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+        gradlePluginPortal()
     }
 }
 
@@ -38,10 +44,8 @@ repositories {
     mavenCentral()
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
-
-shadowJar {
-    archiveClassifier = null
+configurations {
+    implementation.canBeResolved = true
 }
 
 dependencies {
@@ -49,10 +53,12 @@ dependencies {
     compileOnly 'org.apache.logging.log4j:log4j-api:2.17.0' // provided by Logstash
     compileOnly 'org.apache.logging.log4j:log4j-core:2.17.0' // provided by Logstash
  
-    implementation fileTree(dir: LOGSTASH_CORE_PATH, include: "**/logstash-core.jar")
+    implementation fileTree(dir: LOGSTASH_CORE_PATH, include: "**/lib/jars/logstash-core.jar")
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.jruby:jruby-complete:9.2.20.1'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.17.0' // provided by Logstash
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.17.0' // provided by Logstash
 }
 
 clean {
@@ -65,14 +71,31 @@ clean {
     }
 }
 
+jar {
+    manifest {
+        attributes(
+                'Logstash-plugin': "${pluginInfo.pluginFullName()}-${project.version}"
+        )
+    }
+}
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
 tasks.register("vendor"){
-    dependsOn shadowJar
+    dependsOn jar
     doLast {
         String vendorPathPrefix = "vendor/jar-dependencies"
+        configurations.runtimeClasspath.allDependencies
+                .findAll {dep -> dep.group != null } // removes fileTree dependencies
+                .each {dep ->
+                    File f = configurations.runtimeClasspath.filter { it.absolutePath.contains("${dep.group}/${dep.name}/${dep.version}") }.singleFile
+                    String groupPath = dep.group.replaceAll('\\.', '/')
+                    File newJarFile = file("${vendorPathPrefix}/${groupPath}/${dep.name}/${dep.version}/${dep.name}-${dep.version}.jar")
+                    newJarFile.mkdirs()
+                    Files.copy(f.toPath(), newJarFile.toPath(), REPLACE_EXISTING)
+                }
         String projectGroupPath = project.group.replaceAll('\\.', '/')
         File projectJarFile = file("${vendorPathPrefix}/${projectGroupPath}/${pluginInfo.pluginFullName()}/${project.version}/${pluginInfo.pluginFullName()}-${project.version}.jar")
         projectJarFile.mkdirs()
@@ -83,7 +106,11 @@ tasks.register("vendor"){
 
 tasks.register("generateRubySupportFiles") {
     doLast {
-        generateRubySupportFilesForPlugin(project.description, project.group, version)
+        // clean dependencies without group, like the Logstash fileTree
+        var deps = configurations.runtimeClasspath.allDependencies
+                .findAll {dep -> dep.group != null }
+
+        generateRubySupportFilesForPlugin(project.description, project.group, version, deps)
     }
 }
 

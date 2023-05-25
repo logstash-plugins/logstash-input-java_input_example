@@ -1,3 +1,6 @@
+## 1.0.3
+- Updates Gradle script to avoid bundling of Logstash classes [#15](https://github.com/logstash-plugins/logstash-input-java_input_example/pull/15)
+
 ## 1.0.2
 - Updates to improve compatibility with latest Logstash versions
  - Update gradle version to enable JDK17 usage
