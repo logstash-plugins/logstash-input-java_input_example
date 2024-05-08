@@ -1,6 +1,10 @@
 import java.nio.file.Files
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
+ext {
+  snakeYamlVersion = '2.2'
+}
+
 apply plugin: 'java'
 apply from: LOGSTASH_CORE_PATH + "/../rubyUtils.gradle"
 
@@ -20,17 +24,18 @@ pluginInfo.pluginClass     = "JavaInputExample"
 pluginInfo.pluginName      = "java_input_example" // must match the @LogstashPlugin annotation in the main plugin class
 // ===========================================================================
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 buildscript {
     repositories {
         mavenCentral()
+        gradlePluginPortal()
         jcenter()
     }
 
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+        classpath 'com.github.johnrengelman:shadow:8.1.1'
     }
 }
 
@@ -52,7 +57,7 @@ dependencies {
     implementation fileTree(dir: LOGSTASH_CORE_PATH, include: "**/logstash-core.jar")
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.jruby:jruby-complete:9.2.20.1'
+    testImplementation 'org.jruby:jruby-complete:9.4.7.0'
 }
 
 clean {
