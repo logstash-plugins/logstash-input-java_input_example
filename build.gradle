@@ -1,11 +1,24 @@
 import java.nio.file.Files
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
-ext {
-  snakeYamlVersion = '2.2'
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
-apply plugin: 'java'
+plugins {
+  id 'com.github.johnrengelman.shadow' version '8.1.1'
+  id 'java'
+}
+
+ext {
+    snakeYamlVersion = '2.2'
+    shadowGradlePluginVersion = '8.1.1'
+}
+
+
 apply from: LOGSTASH_CORE_PATH + "/../rubyUtils.gradle"
 
 // ===========================================================================
@@ -24,29 +37,19 @@ pluginInfo.pluginClass     = "JavaInputExample"
 pluginInfo.pluginName      = "java_input_example" // must match the @LogstashPlugin annotation in the main plugin class
 // ===========================================================================
 
-sourceCompatibility = 11
-targetCompatibility = 11
-
-buildscript {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.github.johnrengelman:shadow:8.1.1'
-    }
+java {
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
 }
+
 
 repositories {
     mavenCentral()
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
-    archiveClassifier = null
+    archiveClassifier.set('')
 }
 
 dependencies {
