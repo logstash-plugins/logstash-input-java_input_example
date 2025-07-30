@@ -1,0 +1,14 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "org.yaml:snakeyaml:2.2"
+  }
+}
+
+// load versions of jdk and jruby asap so we can use them anywhere else in the scripts
+import org.yaml.snakeyaml.Yaml
+def versionsFile = file(LOGSTASH_CORE_PATH + "/../versions.yml")
+gradle.ext.versions = new Yaml().load(versionsFile.text)

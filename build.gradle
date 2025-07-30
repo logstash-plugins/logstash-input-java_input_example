@@ -18,7 +18,7 @@ ext {
     shadowGradlePluginVersion = '8.1.1'
 }
 
-
+apply from: "$rootDir/loadVersions.gradle"
 apply from: LOGSTASH_CORE_PATH + "/../rubyUtils.gradle"
 
 // ===========================================================================
